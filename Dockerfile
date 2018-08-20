@@ -12,3 +12,6 @@ php-apcu php-intl php-imagick php-mcrypt php-json php-gd php-curl && \
 phpenmod mcrypt && \
 rm -rf /var/lib/apt/lists/* && \
 cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+RUN apt-get install git
+RUN cd /var/www/html
+RUN git clone https://github.com/jskcbe/php
