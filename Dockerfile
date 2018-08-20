@@ -1,17 +1,30 @@
-FROM nimmis/apache
-
-MAINTAINER nimmis <kjell.havneskold@gmail.com>
-
-# disable interactive functions
+FROM ubuntu:latest
+MAINTAINER <satheeshj@soldatinc.com>
 ENV DEBIAN_FRONTEND noninteractive
-
-RUN apt-get update && \
-apt-get install -y php libapache2-mod-php  \
-php-fpm php-cli php-mysqlnd php-pgsql php-sqlite3 php-redis \
-php-apcu php-intl php-imagick php-mcrypt php-json php-gd php-curl && \
-phpenmod mcrypt && \
-rm -rf /var/lib/apt/lists/* && \
-cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
-RUN sudo apt-get install -y git-core
-RUN cd /var/www/html
-RUN git clone https://github.com/jskcbe/php
+# Install basics
+RUN apt-get update
+RUN apt-get install -y software-properties-common && \
+add-apt-repository ppa:ondrej/php && apt-get update
+RUN apt-get install -y — force-yes curl
+RUN apt-get install -y git
+# Install PHP 5.6
+RUN apt-get install -y — allow-unauthenticated php5.6 php5.6-mysql php5.6-mcrypt php5.6-cli php5.6-gd php5.6-curl
+# Enable apache mods.
+RUN a2enmod php5.6
+RUN a2enmod rewrite
+# Update the PHP.ini file, enable <? ?> tags and quieten logging.
+RUN sed -i “s/short_open_tag = Off/short_open_tag = On/” /etc/php/5.6/apache2/php.ini
+RUN sed -i “s/error_reporting = .*$/error_reporting = E_ERROR | E_WARNING | E_PARSE/” /etc/php/5.6/apache2/php.ini
+# Manually set up the apache environment variables
+ENV APACHE_LOG_DIR /var/log/apache2
+ENV APACHE_LOCK_DIR /var/lock/apache2
+ENV APACHE_PID_FILE /var/run/apache2.pid
+# Expose apache.
+EXPOSE 80
+EXPOSE 8080
+EXPOSE 443
+EXPOSE 3306
+# Update the default apache site with the config we created.
+ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
+# By default start up apache in the foreground, override with /bin/bash for interative.
+CMD /usr/sbin/apache2ctl -D FOREGROUND
