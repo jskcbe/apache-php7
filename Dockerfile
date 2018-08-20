@@ -5,7 +5,8 @@ MAINTAINER nimmis <kjell.havneskold@gmail.com>
 # disable interactive functions
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && RUN apt-get install git \
+RUN apt-get update && apt-get upgrade \
+apt-get install git  \
 apt-get install -y php libapache2-mod-php  \
 php-fpm php-cli php-mysqlnd php-pgsql php-sqlite3 php-redis \
 php-apcu php-intl php-imagick php-mcrypt php-json php-gd php-curl && \
